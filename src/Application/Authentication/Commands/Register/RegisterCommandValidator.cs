@@ -8,11 +8,20 @@ namespace ExpenseTracker.Application.Authentication.Commands.Register
         {
             RuleFor(x => x.FirstName)
                 .NotEmpty()
-                .WithMessage("First Name is required");
+                .WithMessage("First Name is required")
+                .MinimumLength(3)
+                .WithMessage("First Name must be at least 3 characters")
+                .MaximumLength(50)
+                .WithMessage("First Name must not exceed 50 characters")
+                .Matches("^[a-zA-Z0-9]*$")
+                .WithMessage("Name must contain only letters and numbers.");
 
-            RuleFor(x => x.LastName)
-                .NotEmpty()
-                .WithMessage("Last Name is required");
+            // rule for last name with numbers and letters only and dashes
+
+            RuleFor(x => x.FirstName)
+                .Matches("^[a-zA-Z0-9]*$")
+                .WithMessage("Name must contain only letters and numbers.");
+
 
             RuleFor(x => x.Email)
                 .NotEmpty()
@@ -25,6 +34,7 @@ namespace ExpenseTracker.Application.Authentication.Commands.Register
                 .WithMessage("Password is required")
                 .MinimumLength(6)
                 .WithMessage("Password must be at least 6 characters");
+
         }
     }
 }

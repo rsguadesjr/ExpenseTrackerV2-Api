@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.API.Errors;
+﻿using ExpenseTracker.API.Converters;
+using ExpenseTracker.API.Errors;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -10,7 +11,11 @@ namespace ExpenseTracker.API
     {
         public static IServiceCollection AddPresentation(this IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                    .AddJsonOptions(options =>
+                    {
+                        options.JsonSerializerOptions.Converters.Add(new TrimStringConverter());
+                    });
             services.AddSwaggerGen();
             services.AddSingleton<ProblemDetailsFactory, ExpenseTrackerProblemDetailsFactory>();
             services.AddMapping();

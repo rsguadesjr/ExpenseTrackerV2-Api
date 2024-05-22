@@ -47,10 +47,9 @@ namespace ExpenseTracker.Application.Account.Commands.UpdateAccount
                 return Result<AccountDto>.Failure(AccountError.NameNotUnique);
             }
 
-            // one account must be default
-            if (!request.IsDefault && !accounts.Any(x => x.IsDefault))
+            if (!request.IsDefault)
             {
-                return Result<AccountDto>.Failure(AccountError.NoDefaultAccount);
+                return Result<AccountDto>.Failure(AccountError.CurrentAccountMustRemainDefault);
             }
 
             // set other accounts to not default

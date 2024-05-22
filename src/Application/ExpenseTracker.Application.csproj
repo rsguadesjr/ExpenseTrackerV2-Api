@@ -7,10 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
     <Folder Include="Transactions\Common\" />
-    <Folder Include="Handlers\" />
-    <Folder Include="Queries\" />
   </ItemGroup>
 
   <ItemGroup>

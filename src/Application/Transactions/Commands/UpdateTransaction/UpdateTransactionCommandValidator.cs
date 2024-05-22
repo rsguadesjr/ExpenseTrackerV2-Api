@@ -1,12 +1,23 @@
 ﻿using FluentValidation;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace ExpenseTracker.Application.Transactions.Commands.CreateTransaction
+namespace ExpenseTracker.Application.Transactions.Commands.UpdateTransaction
 {
-    public class CreateTransactionCommandValidator : AbstractValidator<CreateTransactionCommand>
+    public class UpdateTransactionCommandValidator : AbstractValidator<UpdateTransactionCommand>
     {
-        public CreateTransactionCommandValidator()
+        public UpdateTransactionCommandValidator()
         {
+            RuleFor(x => x.Id)
+                .NotEmpty()
+                .WithMessage("Id is required.");
+
             RuleFor(x => x.Amount)
+                .NotEmpty()
+                .WithMessage("Amount is required")
                 .GreaterThan(0)
                 .WithMessage("Amount must be greater than 0");
 

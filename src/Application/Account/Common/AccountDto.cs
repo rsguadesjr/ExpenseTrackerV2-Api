@@ -11,7 +11,7 @@ namespace ExpenseTracker.Application.Account.Common
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; } = null!;
+        public string Description { get; set; }
         public bool IsActive { get; set; }
         public KeyValueItem<Guid, string> User { get; set; }
         public DateTime? CreatedDate { get; set; }

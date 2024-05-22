@@ -12,7 +12,7 @@ namespace ExpenseTracker.Application.Transactions.Commands.Common
     {
         public Guid Id { get; set; }
         public decimal Amount { get; set; }
-        public string Description { get; set; } = null!;
+        public string Description { get; set; }
         public KeyValueItem<int, string> Category { get; set; }
         public DateTime TransactionDate { get; set; }
         public KeyValueItem<Guid, string> User { get; set; }

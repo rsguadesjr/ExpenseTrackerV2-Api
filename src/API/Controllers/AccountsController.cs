@@ -1,9 +1,10 @@
-﻿using ExpenseTracker.Application.Account.Commands.CreateAccount;
-using ExpenseTracker.Application.Account.Commands.DeleteAccount;
-using ExpenseTracker.Application.Account.Commands.UpdateAccount;
-using ExpenseTracker.Application.Account.Queries.GetAccount;
-using ExpenseTracker.Application.Account.Queries.GetAccounts;
+﻿using ExpenseTracker.Application.Accounts.Commands.CreateAccount;
+using ExpenseTracker.Application.Accounts.Commands.DeleteAccount;
+using ExpenseTracker.Application.Accounts.Commands.UpdateAccount;
+using ExpenseTracker.Application.Accounts.Queries.GetAccountById;
+using ExpenseTracker.Application.Accounts.Queries.GetAccounts;
 using ExpenseTracker.Contracts.Account;
+using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +16,11 @@ namespace ExpenseTracker.API.Controllers
     public class AccountsController : ApiController
     {
         private readonly ISender _mediator;
-        public AccountsController(ISender mediator)
+        private readonly IMapper _mapper;
+        public AccountsController(ISender mediator, IMapper mapper)
         {
             _mediator = mediator;
+            _mapper = mapper;
         }
 
         // GET api/accounts
@@ -39,7 +42,7 @@ namespace ExpenseTracker.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAccount([FromRoute] Guid id)
         {
-            var query = new GetAccountQuery { Id = id };
+            var query = new GetAccountByIdQuery { Id = id };
             var result = await _mediator.Send(query);
 
             if (result.IsSuccess)
@@ -54,7 +57,8 @@ namespace ExpenseTracker.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAccount(CreateAccountRequest request)
         {
-            var command = new CreateAccountCommand { Name = request.Name, Description = request.Description, IsDefault = request.IsDefault };
+            throw new Exception("Not implemented");
+            var command = _mapper.Map<CreateAccountCommand>(request);
             var result = await _mediator.Send(command);
 
             if (result.IsSuccess)
@@ -69,7 +73,7 @@ namespace ExpenseTracker.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAccount([FromRoute] Guid id, CreateAccountRequest request)
         {
-            var command = new UpdateAccountCommand { Id = id, Name = request.Name, Description = request.Description, IsDefault = request.IsDefault };
+            var command = _mapper.Map<UpdateAccountCommand>((id, request));
             var result = await _mediator.Send(command);
 
             if (result.IsSuccess)

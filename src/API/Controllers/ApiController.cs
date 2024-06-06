@@ -20,19 +20,41 @@ namespace ExpenseTracker.API.Controllers
                 return Problem();
             }
 
+            var errorObjects = new List<object>();
+
             if (errors.All(error => error.ErrorType == ErrorType.Validation))
             {
-                var modelDictionary = new ModelStateDictionary();
-                foreach (var err in errors)
+                errorObjects = errors.Select(e => new
                 {
-                    modelDictionary.AddModelError(err.Code, err.Description);
-                }
-
-                return ValidationProblem(modelDictionary);
+                    Field = e.Code,
+                    e.Description,
+                }).ToList<object>();
+            }
+            else
+            {
+                errorObjects = errors.Select(e => new
+                {
+                    e.Code,
+                    e.Description,
+                }).ToList<object>();
             }
 
             var error = errors[0];
-            var statusCode = error.ErrorType switch
+            var statusCode = GetStatusCode(error.ErrorType);
+
+            return Problem(
+                statusCode: (int)statusCode,
+                title: error.ErrorType.ToString(),
+                extensions: new Dictionary<string, object?>
+                {
+                    { "errors", errorObjects }
+                });
+      
+        }
+
+        private HttpStatusCode GetStatusCode(ErrorType errorType)
+        {
+            return errorType switch
             {
                 ErrorType.Validation => HttpStatusCode.BadRequest,
                 ErrorType.NotFound => HttpStatusCode.NotFound,
@@ -41,8 +63,34 @@ namespace ExpenseTracker.API.Controllers
                 ErrorType.Conflict => HttpStatusCode.Conflict,
                 _ => HttpStatusCode.InternalServerError
             };
+        }
+        protected ObjectResult Problem(string? detail = null,
+                                     string? instance = null,
+                                     int? statusCode = null,
+                                     string? title = null,
+                                     string? type = null,
+                                     IDictionary<string, object?>? extensions = null)
+        {
+            var problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                HttpContext,
+                statusCode: statusCode ?? 500,
+                title: title,
+                type: type,
+                detail: detail,
+                instance: instance);
 
-            return Problem(statusCode: (int)statusCode, title: error.Description);
+            if (extensions is not null)
+            {
+                foreach (var extension in extensions)
+                {
+                    problemDetails.Extensions.Add(extension);
+                }
+            }
+
+            return new ObjectResult(problemDetails)
+            {
+                StatusCode = problemDetails.Status
+            };
         }
     }
 }

@@ -17,7 +17,8 @@ namespace ExpenseTracker.Contracts.Transaction
         public Guid CategoryId { get; set; }
         [Required]
         public DateTime TransactionDate { get; set; }
-        public Guid? AccountId { get; set; }
+        [Required]
+        public Guid AccountId { get; set; }
         public List<string> Tags { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using ExpenseTracker.Application.Account.Common;
+﻿using ExpenseTracker.Application.Accounts.Common;
 using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
@@ -7,7 +7,7 @@ using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpenseTracker.Application.Account.Commands.UpdateAccount
+namespace ExpenseTracker.Application.Accounts.Commands.UpdateAccount
 {
     public class UpdateAccountCommand : IRequest<Result<AccountDto>>
     {
@@ -47,7 +47,7 @@ namespace ExpenseTracker.Application.Account.Commands.UpdateAccount
                 return Result<AccountDto>.Failure(AccountError.NameNotUnique);
             }
 
-            if (!request.IsDefault)
+            if (account.IsDefault && !request.IsDefault)
             {
                 return Result<AccountDto>.Failure(AccountError.CurrentAccountMustRemainDefault);
             }

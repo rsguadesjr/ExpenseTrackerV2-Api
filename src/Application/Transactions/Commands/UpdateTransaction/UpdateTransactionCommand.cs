@@ -19,7 +19,6 @@ namespace ExpenseTracker.Application.Transactions.Commands.UpdateTransaction
         public Guid CategoryId { get; set; }
         public DateTime TransactionDate { get; set; }
         public List<string> Tags { get; set; }
-        public Guid? AccountId { get; set; }
     }
 
     public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransactionCommand, Result<TransactionDto>>
@@ -46,10 +45,7 @@ namespace ExpenseTracker.Application.Transactions.Commands.UpdateTransaction
                 return Result<TransactionDto>.Failure(TransactionError.NotFound);
             }
 
-            transaction.Amount = request.Amount;
-            transaction.Description = request.Description;
-            transaction.CategoryId = request.CategoryId;
-            transaction.TransactionDate = request.TransactionDate;
+            request.Adapt(transaction);
 
             await AddTags(request, transaction, cancellationToken);
 
@@ -113,53 +109,6 @@ namespace ExpenseTracker.Application.Transactions.Commands.UpdateTransaction
                     await _dbContext.TransactionTags.AddAsync(transactionTag, cancellationToken);
                 }
             }
-
-
-
-
-            //// get existing tags for the current user that are in the request
-            //var existingUserTags = await _dbContext.Tags
-            //    .Where(x => x.UserId == _requestContext.UserId && request.Tags.Contains(x.Name))
-            //    .ToListAsync();
-
-            //// add tags that are not yet in the database
-            //var toAddTags = request.Tags.Where(x => existingUserTags.All(y => y.Name != x))
-            //    .Select(x => new Tag
-            //    {
-            //        Id = Guid.NewGuid(),
-            //        Name = x,
-            //        UserId = _requestContext.UserId
-            //    })
-            //    .ToList();
-
-            //await _dbContext.Tags.AddRangeAsync(toAddTags, cancellationToken);
-
-
-            //// get existing transaction tags
-            //var existingUserTransactionTags = await _dbContext.TransactionTags
-            //    .Where(x => x.TransactionId == transactionId)
-            //    .Include(x => x.Tag)
-            //    .ToListAsync();
-
-            //// remove transaction tags that are not in the request
-            //var toRemoveTransactionTags = existingUserTransactionTags.Where(x => !request.Tags.Contains(x.Tag.Name)).ToList();
-            //_dbContext.TransactionTags.RemoveRange(toRemoveTransactionTags);
-
-            //// add transaction tags that are not yet in the transaction
-            //var _tags = existingUserTags.Concat(toAddTags).ToList();
-            //foreach(var _tag in _tags)
-            //{
-            //    if(existingUserTransactionTags.All(x => x.TagId != _tag.Id))
-            //    {
-            //        var transactionTag = new TransactionTag
-            //        {
-            //            TransactionId = transactionId,
-            //            TagId = _tag.Id
-            //        };
-            //        await _dbContext.TransactionTags.AddAsync(transactionTag, cancellationToken);
-            //    }
-            //}
-
         }
     }
 }

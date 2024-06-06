@@ -1,11 +1,12 @@
-﻿using ExpenseTracker.Application.Account.Common;
+﻿using ExpenseTracker.Application.Accounts.Common;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
 using ExpenseTracker.Domain.Models.Common;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpenseTracker.Application.Account.Queries.GetAccounts
+namespace ExpenseTracker.Application.Accounts.Queries.GetAccounts
 {
     public class GetAccountsQuery : IRequest<Result<List<AccountDto>>>
     {
@@ -26,13 +27,7 @@ namespace ExpenseTracker.Application.Account.Queries.GetAccounts
         {
             var accounts = await _dbContext.Accounts
                 .Where(a => a.UserId == _requestContext.UserId)
-                .Select(a => new AccountDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Description = a.Description,
-                    IsActive = a.IsActive
-                })
+                .ProjectToType<AccountDto>()  
                 .ToListAsync(cancellationToken);
 
             return Result<List<AccountDto>>.Success(accounts);

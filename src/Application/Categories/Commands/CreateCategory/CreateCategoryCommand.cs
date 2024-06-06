@@ -21,12 +21,12 @@ namespace ExpenseTracker.Application.Categories.Commands.CreateCategory
 
     public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, Result<CategoryDto>>
     {
-        private readonly IRequestContext _requestContext;
         private readonly IExpenseTrackerDbContext _dbContext;
-        public CreateCategoryCommandHandler(IRequestContext requestContext, IExpenseTrackerDbContext dbContext)
+        private readonly IRequestContext _requestContext;
+        public CreateCategoryCommandHandler(IExpenseTrackerDbContext dbContext, IRequestContext requestContext)
         {
-            _requestContext = requestContext;
             _dbContext = dbContext;
+            _requestContext = requestContext;
         }
         public async Task<Result<CategoryDto>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {

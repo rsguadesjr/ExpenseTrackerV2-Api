@@ -20,34 +20,31 @@ namespace ExpenseTracker.Application.Categories.Commands.UpdateCategory
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
-        public bool? IsActive { get; set; } = true;
+        public bool IsActive { get; set; } = true;
         public int? Order { get; set; }
     }
 
     public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, Result<CategoryDto>>
     {
-        private readonly IRequestContext _requestContext;
         private readonly IExpenseTrackerDbContext _dbContext;
+        private readonly IRequestContext _requestContext;
         private readonly IMapper _mapper;
-        public UpdateCategoryCommandHandler(IRequestContext requestContext, IExpenseTrackerDbContext dbContext, IMapper mapper)
+        public UpdateCategoryCommandHandler(IExpenseTrackerDbContext dbContext, IRequestContext requestContext, IMapper mapper)
         {
-            _requestContext = requestContext;
             _dbContext = dbContext;
+            _requestContext = requestContext;
             _mapper = mapper;
         }
         public async Task<Result<CategoryDto>> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = await _dbContext.Categories.FindAsync(request.Id, cancellationToken);
+            var category = await _dbContext.Categories.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (category == null)
             {
                 return Result<CategoryDto>.Failure(CategoryError.NotFound);
             }
 
-
-            var updatedCategory = _mapper.Map(request, category);
-            updatedCategory.UserId = _requestContext.UserId;
-
-            _dbContext.Categories.Update(updatedCategory);
+             
+            request.Adapt(category);
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 
             var result = await _dbContext.Categories

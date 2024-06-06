@@ -1,4 +1,4 @@
-﻿using ExpenseTracker.Application.Account.Common;
+﻿using ExpenseTracker.Application.Accounts.Common;
 using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExpenseTracker.Application.Account.Commands.DeleteAccount
+namespace ExpenseTracker.Application.Accounts.Commands.DeleteAccount
 {
     public class DeleteAccountCommand : IRequest<Result<string>>
     {
@@ -56,7 +56,7 @@ namespace ExpenseTracker.Application.Account.Commands.DeleteAccount
                     .CountAsync(x => x.AccountId == request.Id, cancellationToken);
                 if (transactionCount > 0)
                 {
-                       return Result<string>.Failure(AccountError.AccountHasTransactions);
+                    return Result<string>.Failure(AccountError.AccountHasTransactions);
                 }
             }
 
@@ -69,7 +69,6 @@ namespace ExpenseTracker.Application.Account.Commands.DeleteAccount
                     acc.IsDefault = true;
                 }
             }
-
 
             _dbContext.Accounts.Remove(account);
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);

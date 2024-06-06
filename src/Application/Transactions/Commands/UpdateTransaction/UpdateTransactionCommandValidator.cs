@@ -1,4 +1,8 @@
-﻿using FluentValidation;
+﻿using ExpenseTracker.Application.Common.Interfaces.Authentication;
+using ExpenseTracker.Application.Common.Interfaces.Persistence;
+using ExpenseTracker.Application.Transactions.Commands.CreateTransaction;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,29 +13,25 @@ namespace ExpenseTracker.Application.Transactions.Commands.UpdateTransaction
 {
     public class UpdateTransactionCommandValidator : AbstractValidator<UpdateTransactionCommand>
     {
-        public UpdateTransactionCommandValidator()
+        public UpdateTransactionCommandValidator(IExpenseTrackerDbContext dbContext, IRequestContext requestContext)
         {
+
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .WithMessage("Id is required.");
+                .NotEmpty();
 
             RuleFor(x => x.Amount)
                 .NotEmpty()
-                .WithMessage("Amount is required")
-                .GreaterThan(0)
-                .WithMessage("Amount must be greater than 0");
+                .GreaterThan(0);
 
             RuleFor(x => x.CategoryId)
-                .NotEmpty()
-                .WithMessage("Category is required");
+                .NotEmpty();
 
             RuleFor(x => x.TransactionDate)
-                .NotEmpty()
-                .WithMessage("Transaction Date is required");
+                .NotEmpty();
 
             RuleFor(x => x.Description)
-                .MaximumLength(250)
-                .WithMessage("Description must not exceed 250 characters");
+                .MaximumLength(250);
+
         }
     }
 }

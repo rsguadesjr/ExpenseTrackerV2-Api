@@ -34,26 +34,34 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonth
             DateTime startDate;
             DateTime endDate;
 
-            var query = _dbContext.Transactions.Where(x => x.Account.UserId == _requestContext.UserId);
-            if (request.Month.HasValue)
+            var query = _dbContext.Transactions.AsNoTracking().Where(x => x.Account.UserId == _requestContext.UserId);
+            //if (request.Month.HasValue)
+            //{
+            //    // filter query by startDate and endDate of month
+            //    startDate = new DateTime(request.Year, request.Month.Value, 1);
+            //    endDate = new DateTime(request.Year, request.Month.Value, DateTime.DaysInMonth(request.Year, request.Month.Value));
+            //}
+            //else
+            //{
+            //    // filter query by startDate and endDate
+            //    startDate = new DateTime(request.Year, 1, 1);
+            //    endDate = new DateTime(request.Year, 12, 31);
+            //}
+
+            //query = query.Where(x => x.TransactionDate >= startDate && x.TransactionDate <= endDate);
+
+            try
             {
-                // filter query by startDate and endDate of month
-                startDate = new DateTime(request.Year, request.Month.Value, 1);
-                endDate = new DateTime(request.Year, request.Month.Value, DateTime.DaysInMonth(request.Year, request.Month.Value));
+                var result = await query.ProjectToType<TransactionDto>()
+                                        .ToListAsync(cancellationToken);
+                return Result<List<TransactionDto>>.Success(result);
             }
-            else
+            catch (Exception ex)
             {
-                // filter query by startDate and endDate
-                startDate = new DateTime(request.Year, 1, 1);
-                endDate = new DateTime(request.Year, 12, 31);
             }
 
-            query = query.Where(x => x.TransactionDate >= startDate && x.TransactionDate <= endDate);
 
-            var result = await query.ProjectToType<TransactionDto>()
-                                    .ToListAsync(cancellationToken: cancellationToken);
-
-            return Result<List<TransactionDto>>.Success(result);
+            return Result<List<TransactionDto>>.Success(null);
         }
     }
 }

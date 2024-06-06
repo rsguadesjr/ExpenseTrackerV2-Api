@@ -1,45 +1,35 @@
-﻿using ExpenseTracker.Application.Account.Common;
+﻿using ExpenseTracker.Application.Accounts.Common;
 using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
 using ExpenseTracker.Domain.Models.Common;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ExpenseTracker.Application.Account.Queries.GetAccount
+namespace ExpenseTracker.Application.Accounts.Queries.GetAccountById
 {
-    public class GetAccountQuery : IRequest<Result<AccountDto>>
+    public class GetAccountByIdQuery : IRequest<Result<AccountDto>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetAccountQueryHandler : IRequestHandler<GetAccountQuery, Result<AccountDto>>
+    public class GetAccountByIdQueryHandler : IRequestHandler<GetAccountByIdQuery, Result<AccountDto>>
     {
         private readonly IExpenseTrackerDbContext _dbContext;
         private readonly IRequestContext _requestContext;
 
-        public GetAccountQueryHandler(IRequestContext requestContext, IExpenseTrackerDbContext dbContext)
+        public GetAccountByIdQueryHandler(IRequestContext requestContext, IExpenseTrackerDbContext dbContext)
         {
             _requestContext = requestContext;
             _dbContext = dbContext;
         }
 
-        public async Task<Result<AccountDto>> Handle(GetAccountQuery request, CancellationToken cancellationToken)
+        public async Task<Result<AccountDto>> Handle(GetAccountByIdQuery request, CancellationToken cancellationToken)
         {
             var account = await _dbContext.Accounts
                 .Where(a => a.UserId == _requestContext.UserId && a.Id == request.Id)
-                .Select(a => new AccountDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Description = a.Description,
-                    IsActive = a.IsActive
-                })
+                .ProjectToType<AccountDto>()
                 .SingleOrDefaultAsync(cancellationToken);
 
             if (account == null)

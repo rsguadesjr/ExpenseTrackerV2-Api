@@ -13,7 +13,7 @@ namespace ExpenseTracker.Application.Transactions.Commands.CreateTransaction
 {
     public class CreateTransactionCommand : IRequest<Result<TransactionDto>>
     {
-        public Guid? AccountId { get; set; }
+        public Guid AccountId { get; set; }
         public decimal Amount { get; set; }
         public string Description { get; set; }
         public Guid CategoryId { get; set; }
@@ -35,31 +35,27 @@ namespace ExpenseTracker.Application.Transactions.Commands.CreateTransaction
         }
         public async Task<Result<TransactionDto>> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
-            // if AccountId is not provided, get the default account
-            if (request.AccountId == null)
-            {
-                var accountId = (await _dbContext.Accounts.SingleOrDefaultAsync(x => x.UserId == _requestContext.UserId && x.IsDefault))?.Id;
-                if (accountId == null)
-                {
-                    return Result<TransactionDto>.Failure(AccountError.NoDefaultAccount);
-                }
 
-                request.AccountId = accountId;
+            // validate AccountId if it belongs to the user
+            var isAccountBelongsToUser = await _dbContext.Accounts
+                                                        .AsNoTracking()
+                                                        .AnyAsync(x => x.UserId == _requestContext.UserId && x.Id == request.AccountId, cancellationToken);
+            if (!isAccountBelongsToUser)
+            {
+                return Result<TransactionDto>.Failure(AccountError.NotFound);
             }
 
             var transaction = new Domain.Entities.Transaction
             {
                 Id = Guid.NewGuid(),
-                AccountId = request.AccountId.Value,
+                AccountId = request.AccountId,
                 Amount = request.Amount,
                 Description = request.Description,
                 CategoryId = request.CategoryId,
                 TransactionDate = request.TransactionDate,
             };
             await _dbContext.Transactions.AddAsync(transaction, cancellationToken);
-
             await AddTags(request, transaction.Id, cancellationToken);
-
 
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 

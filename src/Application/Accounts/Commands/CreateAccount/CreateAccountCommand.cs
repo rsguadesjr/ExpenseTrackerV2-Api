@@ -1,4 +1,4 @@
-﻿using ExpenseTracker.Application.Account.Common;
+﻿using ExpenseTracker.Application.Accounts.Common;
 using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExpenseTracker.Application.Account.Commands.CreateAccount
+namespace ExpenseTracker.Application.Accounts.Commands.CreateAccount
 {
     public class CreateAccountCommand : IRequest<Result<AccountDto>>
     {

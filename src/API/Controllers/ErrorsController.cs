@@ -8,8 +8,8 @@ namespace ExpenseTracker.API.Controllers
     [AllowAnonymous]
     public class ErrorsController : ApiController
     {
-        private readonly IWebHostEnvironment _env;
-        public ErrorsController(IWebHostEnvironment env)
+        private readonly IHostEnvironment _env;
+        public ErrorsController(IHostEnvironment env)
         {
             _env = env;
         }
@@ -25,7 +25,7 @@ namespace ExpenseTracker.API.Controllers
                 return Problem(title: exception?.Message, detail: exception?.StackTrace);
             }
 
-            return Problem(title: "Server Failure", detail: "An error occurred");
+            return Problem(title: "Server Error", detail: "An unhandled error occurred.");
         }
     }
 }

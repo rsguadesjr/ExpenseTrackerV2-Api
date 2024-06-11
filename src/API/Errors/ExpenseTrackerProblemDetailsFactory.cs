@@ -85,7 +85,7 @@ namespace ExpenseTracker.API.Errors
                 problemDetails.Type ??= clientErrorData.Link;
             }
 
-            var traceId = Activity.Current?.Id ?? httpContext?.TraceIdentifier;
+            var traceId = httpContext?.TraceIdentifier;
             if (traceId != null)
             {
                 problemDetails.Extensions["traceId"] = traceId;

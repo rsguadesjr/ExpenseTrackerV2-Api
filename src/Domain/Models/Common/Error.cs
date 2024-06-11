@@ -33,11 +33,6 @@ namespace ExpenseTracker.Domain.Models.Common
             return new Error(code, message, ErrorType.Unauthorized);
         }
 
-        public static Error Forbidden(string code, string message)
-        {
-            return new Error(code, message, ErrorType.Forbidden);
-        }
-
         public static Error Conflict(string code, string message)
         {
             return new Error(code, message, ErrorType.Conflict);
@@ -50,7 +45,6 @@ namespace ExpenseTracker.Domain.Models.Common
         Validation,
         NotFound,
         Unauthorized,
-        Forbidden,
         Conflict
     }
 }

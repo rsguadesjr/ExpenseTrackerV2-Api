@@ -20,51 +20,52 @@ namespace ExpenseTracker.API.Controllers
                 return Problem();
             }
 
-            var errorObjects = new List<object>();
-
             if (errors.All(error => error.ErrorType == ErrorType.Validation))
             {
-                errorObjects = errors.Select(e => new
+                var modelDictionary = new ModelStateDictionary();
+                foreach (var err in errors)
                 {
-                    Field = e.Code,
-                    e.Description,
-                }).ToList<object>();
-            }
-            else
-            {
-                errorObjects = errors.Select(e => new
-                {
-                    e.Code,
-                    e.Description,
-                }).ToList<object>();
+                    modelDictionary.AddModelError(err.Code, err.Description);
+                }
+
+                return ValidationProblem(modelDictionary);
             }
 
             var error = errors[0];
             var statusCode = GetStatusCode(error.ErrorType);
+            var title = GetTitle(error.ErrorType);
 
-            return Problem(
-                statusCode: (int)statusCode,
-                title: error.ErrorType.ToString(),
-                extensions: new Dictionary<string, object?>
-                {
-                    { "errors", errorObjects }
-                });
-      
+            return Problem(title: title, detail: error.Description, statusCode: statusCode, extensions: new Dictionary<string, object?>
+                        {
+                            { "errorCode", error.Code }
+                        });
         }
 
-        private HttpStatusCode GetStatusCode(ErrorType errorType)
+        private static int GetStatusCode(ErrorType errorType)
         {
             return errorType switch
             {
-                ErrorType.Validation => HttpStatusCode.BadRequest,
-                ErrorType.NotFound => HttpStatusCode.NotFound,
-                ErrorType.Forbidden => HttpStatusCode.Forbidden,
-                ErrorType.Unauthorized => HttpStatusCode.Unauthorized,
-                ErrorType.Conflict => HttpStatusCode.Conflict,
-                _ => HttpStatusCode.InternalServerError
+                ErrorType.Validation => StatusCodes.Status400BadRequest,
+                ErrorType.NotFound => StatusCodes.Status404NotFound,
+                ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+                ErrorType.Conflict => StatusCodes.Status409Conflict,
+                _ => StatusCodes.Status500InternalServerError
             };
         }
-        protected ObjectResult Problem(string? detail = null,
+
+
+        private static string GetTitle(ErrorType errorType)
+        {
+            return errorType switch
+            {
+                ErrorType.Validation => "Bad Request",
+                ErrorType.NotFound => "Not Found",
+                ErrorType.Unauthorized => "Unauthorized",
+                ErrorType.Conflict => "Conflict",
+                _ => "Server Error"
+            };
+        }
+        private ObjectResult Problem(string? detail = null,
                                      string? instance = null,
                                      int? statusCode = null,
                                      string? title = null,

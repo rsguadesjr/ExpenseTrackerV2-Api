@@ -1,6 +1,7 @@
 using ExpenseTracker.API;
 using ExpenseTracker.Application;
 using ExpenseTracker.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -13,6 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddPresentation();
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
+
+    builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
+    {
+        loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
+    });
 
     builder.Services.AddCors(options =>
     {

@@ -57,7 +57,6 @@ namespace ExpenseTracker.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAccount(CreateAccountRequest request)
         {
-            throw new Exception("Not implemented");
             var command = _mapper.Map<CreateAccountCommand>(request);
             var result = await _mediator.Send(command);
 

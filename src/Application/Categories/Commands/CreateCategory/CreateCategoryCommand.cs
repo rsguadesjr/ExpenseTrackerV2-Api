@@ -1,7 +1,7 @@
 ﻿using ExpenseTracker.Application.Categories.Common;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
-using ExpenseTracker.Application.Transactions.Commands.Common;
+using ExpenseTracker.Application.Transactions.Commands;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Models.Common;
 using Mapster;
@@ -43,6 +43,7 @@ namespace ExpenseTracker.Application.Categories.Commands.CreateCategory
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 
             var result = await _dbContext.Categories.Where(x => x.Id == category.Id)
+                .AsNoTracking()
                 .ProjectToType<CategoryDto>()
                 .SingleOrDefaultAsync(cancellationToken);
 

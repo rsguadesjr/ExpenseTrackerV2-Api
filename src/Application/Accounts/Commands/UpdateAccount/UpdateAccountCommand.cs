@@ -65,6 +65,7 @@ namespace ExpenseTracker.Application.Accounts.Commands.UpdateAccount
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 
             var result = await _dbContext.Accounts
+                .AsNoTracking()
                 .ProjectToType<AccountDto>()
                 .SingleAsync(x => x.Id == account.Id, cancellationToken);
 

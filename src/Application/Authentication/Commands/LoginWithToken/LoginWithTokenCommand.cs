@@ -40,7 +40,9 @@ namespace ExpenseTracker.Application.Authentication.Commands.LoginWithToken
             }
 
             // add user to db if not exists
-            var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == result.Email);
+            var user = await _dbContext.Users
+                .AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Email == result.Email, cancellationToken: cancellationToken);
             if (user == null)
             {
                 var newUser = new User
@@ -50,16 +52,16 @@ namespace ExpenseTracker.Application.Authentication.Commands.LoginWithToken
                     IdentityId = result.IdentityId,
                 };
 
-                await _dbContext.Users.AddAsync(newUser);
-                await _dbContext.SaveChangesAsync();
+                await _dbContext.Users.AddAsync(newUser, cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken);
 
                 user = newUser;
             }
 
             await _authService.SetCustomClaims(result.IdentityId, new Dictionary<string, object>
             {
-                { JwtRegisteredClaimNames.GivenName, user.FirstName },
-                { JwtRegisteredClaimNames.FamilyName, user.LastName },
+                { JwtRegisteredClaimNames.GivenName, user.FirstName ?? string.Empty },
+                { JwtRegisteredClaimNames.FamilyName, user.LastName?? string.Empty },
                 { "guid", user.Id },
             });
 
@@ -68,8 +70,8 @@ namespace ExpenseTracker.Application.Authentication.Commands.LoginWithToken
             {
                 Token = command.IdToken,
                 Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
                 IsProfileSetupComplete = true
             });
         }

@@ -3,6 +3,7 @@ using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
 using ExpenseTracker.Domain.Models.Common;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OneOf;
 using System;
 using System.Collections.Generic;
@@ -29,24 +30,15 @@ namespace ExpenseTracker.Application.Transactions.Commands.DeleteTransaction
 
         public async Task<Result<string>> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
         {
-            var transaction = await _dbContext.Transactions.FindAsync(request.TransactionId);
+            var transaction = await _dbContext.Transactions.SingleOrDefaultAsync(x => x.Account.UserId == _requestContext.UserId && x.Id == request.TransactionId, cancellationToken);
             if (transaction == null)
             {
                 return Result<string>.Failure(TransactionError.NotFound);
             }
-            else
-            {
-                try
-                {
-                    _dbContext.Transactions.Remove(transaction);
-                    await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
-                    return Result<string>.Success("");
-                }
-                catch(Exception ex)
-                {
-                    throw ex;
-                }
-            }
+
+            _dbContext.Transactions.Remove(transaction);
+            await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
+            return Result<string>.Success("");
         }
     }
 }

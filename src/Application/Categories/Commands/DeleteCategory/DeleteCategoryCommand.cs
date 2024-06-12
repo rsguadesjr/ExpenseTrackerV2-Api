@@ -3,13 +3,14 @@ using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
 using ExpenseTracker.Domain.Models.Common;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Application.Categories.Commands.DeleteCategory
 {
     // generate DeleteCategoryCommand class with public int Id and implement IRequest<Result<string>>
     public class DeleteCategoryCommand : IRequest<Result<string>>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 
     // generate DeleteCategoryCommandHandler class with IExpenseTrackerDbContext and IRequestContext as constructor parameters
@@ -24,7 +25,7 @@ namespace ExpenseTracker.Application.Categories.Commands.DeleteCategory
         }
         public async Task<Result<string>> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = await _dbContext.Categories.FindAsync(request.Id);
+            var category = await _dbContext.Categories.SingleOrDefaultAsync(x => x.UserId == _requestContext.UserId && x.Id == request.Id, cancellationToken);
             if (category == null)
             {
                 return Result<string>.Failure(TransactionError.NotFound);
@@ -32,7 +33,7 @@ namespace ExpenseTracker.Application.Categories.Commands.DeleteCategory
             else
             {
                 _dbContext.Categories.Remove(category);
-                await _dbContext.SaveChangesAsync(_requestContext.UserId);
+                await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
                 return Result<string>.Success("");
             }
         }

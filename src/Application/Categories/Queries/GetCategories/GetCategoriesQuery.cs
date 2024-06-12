@@ -29,6 +29,7 @@ namespace ExpenseTracker.Application.Categories.Queries.GetCategories
         public async Task<Result<List<CategoryDto>>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
         {
             var categories = await _dbContext.Categories
+                .AsNoTracking()
                 .Where(x => x.UserId == _requestContext.UserId)
                 .ProjectToType<CategoryDto>()
                 .ToListAsync(cancellationToken);

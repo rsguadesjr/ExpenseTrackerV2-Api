@@ -1,7 +1,7 @@
 ﻿using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
-using ExpenseTracker.Application.Transactions.Commands.Common;
+using ExpenseTracker.Application.Transactions.Common;
 using ExpenseTracker.Domain.Models.Common;
 using Mapster;
 using MediatR;
@@ -34,34 +34,29 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonth
             DateTime startDate;
             DateTime endDate;
 
-            var query = _dbContext.Transactions.AsNoTracking().Where(x => x.Account.UserId == _requestContext.UserId);
-            //if (request.Month.HasValue)
-            //{
-            //    // filter query by startDate and endDate of month
-            //    startDate = new DateTime(request.Year, request.Month.Value, 1);
-            //    endDate = new DateTime(request.Year, request.Month.Value, DateTime.DaysInMonth(request.Year, request.Month.Value));
-            //}
-            //else
-            //{
-            //    // filter query by startDate and endDate
-            //    startDate = new DateTime(request.Year, 1, 1);
-            //    endDate = new DateTime(request.Year, 12, 31);
-            //}
-
-            //query = query.Where(x => x.TransactionDate >= startDate && x.TransactionDate <= endDate);
-
-            try
+            var query = _dbContext.Transactions
+                                            .AsNoTracking()
+                                            .Where(x => x.Account.UserId == _requestContext.UserId);
+            if (request.Month.HasValue)
             {
-                var result = await query.ProjectToType<TransactionDto>()
-                                        .ToListAsync(cancellationToken);
-                return Result<List<TransactionDto>>.Success(result);
+                // date params will be the whole month
+                startDate = new DateTime(request.Year, request.Month.Value, 1, 0, 0, 0, DateTimeKind.Utc);
+                endDate = new DateTime(request.Year, request.Month.Value, DateTime.DaysInMonth(request.Year, request.Month.Value), 0, 0, 0, DateTimeKind.Utc);
             }
-            catch (Exception ex)
+            else
             {
+                // date params will be the whole year
+                startDate = new DateTime(request.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                endDate = new DateTime(request.Year, 12, 31, 0, 0, 0, DateTimeKind.Utc);
             }
 
+            query = query.Where(x => x.TransactionDate >= startDate && x.TransactionDate <= endDate);
 
-            return Result<List<TransactionDto>>.Success(null);
+            var result = await query
+                                .ProjectToType<TransactionDto>()
+                                .ToListAsync(cancellationToken);
+
+            return Result<List<TransactionDto>>.Success(result);
         }
     }
 }

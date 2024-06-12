@@ -37,7 +37,7 @@ namespace ExpenseTracker.Application.Categories.Commands.UpdateCategory
         }
         public async Task<Result<CategoryDto>> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {
-            var category = await _dbContext.Categories.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var category = await _dbContext.Categories.SingleOrDefaultAsync(x => x.UserId == _requestContext.UserId && x.Id == request.Id, cancellationToken);
             if (category == null)
             {
                 return Result<CategoryDto>.Failure(CategoryError.NotFound);
@@ -48,6 +48,7 @@ namespace ExpenseTracker.Application.Categories.Commands.UpdateCategory
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 
             var result = await _dbContext.Categories
+                .AsNoTracking()
                 .ProjectToType<CategoryDto>()
                 .SingleOrDefaultAsync(x => x.Id == category.Id, cancellationToken);
 

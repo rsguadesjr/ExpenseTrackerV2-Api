@@ -1,7 +1,7 @@
 ﻿using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
-using ExpenseTracker.Application.Transactions.Commands.Common;
+using ExpenseTracker.Application.Transactions.Common;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Models.Common;
 using Mapster;
@@ -35,12 +35,10 @@ namespace ExpenseTracker.Application.Transactions.Commands.CreateTransaction
         }
         public async Task<Result<TransactionDto>> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
-
             // validate AccountId if it belongs to the user
-            var isAccountBelongsToUser = await _dbContext.Accounts
-                                                        .AsNoTracking()
+            var accountBelongsToUser = await _dbContext.Accounts
                                                         .AnyAsync(x => x.UserId == _requestContext.UserId && x.Id == request.AccountId, cancellationToken);
-            if (!isAccountBelongsToUser)
+            if (!accountBelongsToUser)
             {
                 return Result<TransactionDto>.Failure(AccountError.NotFound);
             }
@@ -60,11 +58,11 @@ namespace ExpenseTracker.Application.Transactions.Commands.CreateTransaction
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 
             var result = await _dbContext.Transactions
+                .AsNoTracking()
                 .ProjectToType<TransactionDto>()
                 .SingleOrDefaultAsync(x => x.Id == transaction.Id, cancellationToken);
 
-
-            return Result<TransactionDto>.Success(result);
+            return Result<TransactionDto>.Success(result!);
         }
 
 

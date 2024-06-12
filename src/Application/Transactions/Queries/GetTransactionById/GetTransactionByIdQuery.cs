@@ -1,6 +1,6 @@
 ﻿using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
-using ExpenseTracker.Application.Transactions.Commands.Common;
+using ExpenseTracker.Application.Transactions.Common;
 using ExpenseTracker.Domain.Models.Common;
 using Mapster;
 using MediatR;
@@ -14,12 +14,12 @@ using System.Threading.Tasks;
 
 namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionById
 {
-    public class GetTransactionByIdQuery : IRequest<Result<TransactionDto?>>
+    public class GetTransactionByIdQuery : IRequest<Result<TransactionDto>>
     {
         public Guid TransactionId { get; set; }
     }
 
-    public class GetTransactionByIdQueryHandler : IRequestHandler<GetTransactionByIdQuery, Result<TransactionDto?>>
+    public class GetTransactionByIdQueryHandler : IRequestHandler<GetTransactionByIdQuery, Result<TransactionDto>>
     {
         private readonly IExpenseTrackerDbContext _dbContext;
 
@@ -28,27 +28,19 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionById
             _dbContext = dbContext;
         }
 
-        public async Task<Result<TransactionDto?>> Handle(GetTransactionByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<TransactionDto>> Handle(GetTransactionByIdQuery request, CancellationToken cancellationToken)
         {
-            // query the database for the transaction with the given id
-            try
-            {
-                var transaction = await _dbContext.Transactions
-                                .ProjectToType<TransactionDto>()
-                                .SingleOrDefaultAsync(x => x.Id == request.TransactionId);
+            var transaction = await _dbContext.Transactions
+                            .AsNoTracking()
+                            .ProjectToType<TransactionDto>()
+                            .SingleOrDefaultAsync(x => x.Id == request.TransactionId, cancellationToken);
 
-                return Result<TransactionDto?>.Success(transaction);
-            }
-            catch (ArgumentNullException)
+            if (transaction == null)
             {
-                return Result<TransactionDto?>.Failure(TransactionError.NotFound);
-            }
-            catch (Exception)
-            {
-                // logger here
-                return Result<TransactionDto?>.Failure(new Error("General", "An error occurred while fetching the transaction"));
+                return Result<TransactionDto>.Failure(TransactionError.NotFound);
             }
 
+            return Result<TransactionDto>.Success(transaction);
         }
     }
 }

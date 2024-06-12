@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExpenseTracker.Application.Transactions.Commands.Common
+namespace ExpenseTracker.Application.Transactions.Common
 {
     public class TransactionDto
     {

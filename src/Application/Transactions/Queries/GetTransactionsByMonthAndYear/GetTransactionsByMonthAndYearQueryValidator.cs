@@ -14,15 +14,12 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonth
             // rule for year must be a valid year with 4 digits
             RuleFor(x => x.Year)
                 .NotEmpty()
-                .WithMessage("Year is required.")
                 .Must(x => x.ToString().Length == 4)
-                .WithMessage("Year must be a valid year with 4 digits.");
+                .WithMessage(x => $"'{nameof(x.Year)}' must be a valid 4 digit year.");
 
             RuleFor(x => x.Month)
-                .GreaterThanOrEqualTo(1)
-                .WithMessage("Month must be greater than or equal to 1.")
-                .LessThanOrEqualTo(12)
-                .WithMessage("Month must be less than or equal to 12.");
+                .Must(x => !x.HasValue || (x >= 1 && x <= 12))
+                .WithMessage(x => $"'{nameof(x.Month)}' must be within range of 1 to 12. 1 is January and 12 is December");
         }
     }
 }

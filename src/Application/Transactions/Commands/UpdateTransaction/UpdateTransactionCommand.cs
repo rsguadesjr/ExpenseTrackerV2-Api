@@ -1,7 +1,7 @@
 ﻿using ExpenseTracker.Application.Common.Errors;
 using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
-using ExpenseTracker.Application.Transactions.Commands.Common;
+using ExpenseTracker.Application.Transactions.Common;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Models.Common;
 using Mapster;
@@ -39,7 +39,7 @@ namespace ExpenseTracker.Application.Transactions.Commands.UpdateTransaction
 
             var transaction = await _dbContext.Transactions
                                         .Include(x => x.TransactionTags).ThenInclude(x => x.Tag)        
-                                        .SingleOrDefaultAsync(x => x.Id == request.Id);
+                                        .SingleOrDefaultAsync(x => x.Account.UserId == _requestContext.UserId && x.Id == request.Id, cancellationToken);
             if (transaction == null)
             {
                 return Result<TransactionDto>.Failure(TransactionError.NotFound);
@@ -52,10 +52,11 @@ namespace ExpenseTracker.Application.Transactions.Commands.UpdateTransaction
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 
             var result = await _dbContext.Transactions
+                .AsNoTracking()
                 .ProjectToType<TransactionDto>()
                 .SingleOrDefaultAsync(x => x.Id == transaction.Id, cancellationToken);
 
-            return Result<TransactionDto>.Success(result);
+            return Result<TransactionDto>.Success(result!);
         }
 
         private async Task AddTags(UpdateTransactionCommand request, Domain.Entities.Transaction transaction, CancellationToken cancellationToken)

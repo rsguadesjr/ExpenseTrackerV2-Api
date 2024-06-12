@@ -28,6 +28,7 @@ namespace ExpenseTracker.Application.Accounts.Queries.GetAccountById
         public async Task<Result<AccountDto>> Handle(GetAccountByIdQuery request, CancellationToken cancellationToken)
         {
             var account = await _dbContext.Accounts
+                .AsNoTracking()
                 .Where(a => a.UserId == _requestContext.UserId && a.Id == request.Id)
                 .ProjectToType<AccountDto>()
                 .SingleOrDefaultAsync(cancellationToken);

@@ -42,8 +42,8 @@ namespace ExpenseTracker.Application.Accounts.Commands.CreateAccount
             };
 
             var accounts = await _dbContext.Accounts
-                .Where(x => x.UserId == _requestContext.UserId)
-                .ToListAsync(cancellationToken);
+                                                .Where(x => x.UserId == _requestContext.UserId)
+                                                .ToListAsync(cancellationToken);
 
             // account name must be unique
             if (accounts.Any(x => x.Name == request.Name))
@@ -64,8 +64,9 @@ namespace ExpenseTracker.Application.Accounts.Commands.CreateAccount
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 
             var result = await _dbContext.Accounts
-                                .ProjectToType<AccountDto>()
-                                .SingleAsync(x => x.Id == account.Id, cancellationToken);
+                .AsNoTracking()
+                .ProjectToType<AccountDto>()
+                .SingleAsync(x => x.Id == account.Id, cancellationToken);
 
             return Result<AccountDto>.Success(result);
         }

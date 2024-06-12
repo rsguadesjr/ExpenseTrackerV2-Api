@@ -1,4 +1,4 @@
-﻿using ExpenseTracker.Application.Transactions.Commands.Common;
+﻿using ExpenseTracker.Application.Transactions.Common;
 using ExpenseTracker.Domain.Models.Common;
 using Mapster;
 

@@ -85,7 +85,7 @@ namespace ExpenseTracker.API.Controllers
 
         // DELETE api/categories/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory([FromRoute] int id)
+        public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             var command = new DeleteCategoryCommand { Id = id };
             var result = await _mediator.Send(command);

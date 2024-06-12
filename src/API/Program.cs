@@ -5,11 +5,6 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    builder.Configuration
-            .AddJsonFile("appsettings.json", optional: true)
-            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-            .AddEnvironmentVariables()
-            .AddUserSecrets<Program>();
 
     builder.Services.AddPresentation();
     builder.Services.AddApplication();

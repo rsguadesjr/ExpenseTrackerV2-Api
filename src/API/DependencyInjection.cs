@@ -15,6 +15,10 @@ namespace ExpenseTracker.API
                     .AddJsonOptions(options =>
                     {
                         options.JsonSerializerOptions.Converters.Add(new TrimStringConverter());
+                    })
+                    .ConfigureApiBehaviorOptions(options =>
+                    { 
+                        options.SuppressModelStateInvalidFilter = true;
                     });
             services.AddSwaggerGen();
             services.AddSingleton<ProblemDetailsFactory, ExpenseTrackerProblemDetailsFactory>();

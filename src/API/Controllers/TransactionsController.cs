@@ -1,14 +1,18 @@
-﻿using ExpenseTracker.Application.Transactions.Commands.CreateTransaction;
+﻿using ExpenseTracker.Application.Transactions.Commands.Common;
+using ExpenseTracker.Application.Transactions.Commands.CreateTransaction;
 using ExpenseTracker.Application.Transactions.Commands.DeleteTransaction;
 using ExpenseTracker.Application.Transactions.Commands.UpdateTransaction;
 using ExpenseTracker.Application.Transactions.Queries.GetTransactionById;
 using ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonthAndYear;
+using ExpenseTracker.Contracts.Common;
 using ExpenseTracker.Contracts.Transaction;
 using Mapster;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+using System.Net.Mime;
 
 namespace ExpenseTracker.API.Controllers
 {
@@ -26,6 +30,9 @@ namespace ExpenseTracker.API.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> CreateTransaction(CreateTransactionRequest request)
         {
             var command = _mapper.Map<CreateTransactionCommand>(request);
@@ -41,6 +48,9 @@ namespace ExpenseTracker.API.Controllers
 
         // PUT api/categories/5
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> UpdateTransaction([FromRoute] Guid id, CreateTransactionRequest request)
         {
             var command = _mapper.Map<UpdateTransactionCommand>((id, request));
@@ -56,6 +66,9 @@ namespace ExpenseTracker.API.Controllers
 
         // GET api/transactions/5
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> GetTransaction([FromRoute] Guid id)
         {
             var query = new GetTransactionByIdQuery { TransactionId = id };
@@ -71,6 +84,9 @@ namespace ExpenseTracker.API.Controllers
 
         // GET api/transactions
         [HttpGet]
+        [ProducesResponseType(typeof(List<TransactionDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> GetTransactions([FromQuery] int year, [FromQuery] int? month)
         {
             var query = new GetTransactionsByMonthAndYearQuery { Year = year, Month = month };
@@ -87,6 +103,8 @@ namespace ExpenseTracker.API.Controllers
 
         // DELETE api/transactions/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> DeleteTransaction([FromRoute] Guid id)
         {
             var command = new DeleteTransactionCommand { TransactionId = id };
@@ -94,7 +112,7 @@ namespace ExpenseTracker.API.Controllers
 
             if (result.IsSuccess)
             {
-                return Ok(result.Value);
+                return Ok();
             }
 
             return Problem(result.Errors);

@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers
 {
-    [Route("/error")]
-    [AllowAnonymous]
-    public class ErrorsController : ApiController
+    public class ErrorsController : ControllerBase
     {
         private readonly IHostEnvironment _env;
         public ErrorsController(IHostEnvironment env)
@@ -15,7 +13,7 @@ namespace ExpenseTracker.API.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        [HttpPost]
+        [Route("/error")]
         public IActionResult Error()
         {
             var exception = HttpContext.Features.Get<IExceptionHandlerFeature>()?.Error;

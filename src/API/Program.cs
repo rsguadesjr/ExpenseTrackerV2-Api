@@ -15,14 +15,15 @@ var builder = WebApplication.CreateBuilder(args);
         loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
     });
 
+    var corsConfig = builder.Configuration.GetSection("Cors:AllowedOrigins");
+    var allowedOrigins = corsConfig.Get<string[]>() ?? [];
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("CorsPolicy",
                           policy =>
                           {
-                              policy.WithOrigins("http://example.com",
-                                                  "http://www.contoso.com")
-                              .AllowAnyHeader();
+                              policy.WithOrigins(allowedOrigins)
+                                    .AllowAnyHeader();
                           });
     });
 }

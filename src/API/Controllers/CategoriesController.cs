@@ -1,13 +1,16 @@
 ﻿using ExpenseTracker.Application.Categories.Commands.CreateCategory;
 using ExpenseTracker.Application.Categories.Commands.DeleteCategory;
 using ExpenseTracker.Application.Categories.Commands.UpdateCategory;
+using ExpenseTracker.Application.Categories.Common;
 using ExpenseTracker.Application.Categories.Queries.GetCategories;
 using ExpenseTracker.Application.Categories.Queries.GetCategoryById;
 using ExpenseTracker.Contracts.Category;
+using ExpenseTracker.Contracts.Common;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 namespace ExpenseTracker.API.Controllers
 {
@@ -25,6 +28,8 @@ namespace ExpenseTracker.API.Controllers
 
         // POST api/categories
         [HttpPost]
+        [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> CreateCategory(CreateCategoryRequest request)
         {
             var command = _mapper.Map<CreateCategoryCommand>(request);
@@ -40,6 +45,9 @@ namespace ExpenseTracker.API.Controllers
 
         // PUT api/categories/5
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid id, CreateCategoryRequest request)
         {
             var command = _mapper.Map<UpdateCategoryCommand>((id, request));
@@ -55,6 +63,9 @@ namespace ExpenseTracker.API.Controllers
 
         // GET api/categories/5
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> GetCategory([FromRoute] Guid id)
         {
             var query = new GetCategoryByIdQuery { Id = id };
@@ -70,6 +81,9 @@ namespace ExpenseTracker.API.Controllers
 
         // GET api/categories
         [HttpGet]
+        [ProducesResponseType(typeof(List<CategoryDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> GetCategories()
         {
             var query = new GetCategoriesQuery();
@@ -85,6 +99,8 @@ namespace ExpenseTracker.API.Controllers
 
         // DELETE api/categories/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             var command = new DeleteCategoryCommand { Id = id };

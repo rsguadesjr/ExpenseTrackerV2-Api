@@ -11,5 +11,6 @@ namespace ExpenseTracker.Domain.Models.Common.Authentication
         public string IdentityId { get; set; }
         public string Email { get; set; }
         public string Name { get; set; }
+        public bool EmailVerified { get; set; }
     }
 }

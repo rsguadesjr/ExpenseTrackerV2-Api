@@ -15,12 +15,13 @@ using System.Threading.Tasks;
 
 namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonthAndYear
 {
-    public class GetTransactionsByMonthAndYearQuery : IRequest<Result<List<TransactionDto>>>
+    public class GetTransactionsQuery : IRequest<Result<List<TransactionDto>>>
     {
         public int? Month { get; set; }
         public int Year { get; set; }
+        public Guid? AccountId { get; set; }
     }
-    public class GetTransactionsByMonthAndYearQueryHandler : IRequestHandler<GetTransactionsByMonthAndYearQuery, Result<List<TransactionDto>>>
+    public class GetTransactionsByMonthAndYearQueryHandler : IRequestHandler<GetTransactionsQuery, Result<List<TransactionDto>>>
     {
         private readonly IExpenseTrackerDbContext _dbContext;
         private readonly IRequestContext _requestContext;
@@ -29,7 +30,7 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonth
             _dbContext = dbContext;
             _requestContext = requestContext;
         }
-        public async Task<Result<List<TransactionDto>>> Handle(GetTransactionsByMonthAndYearQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<TransactionDto>>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             DateTime startDate;
             DateTime endDate;
@@ -50,10 +51,16 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonth
                 endDate = new DateTime(request.Year, 12, 31, 0, 0, 0, DateTimeKind.Utc);
             }
 
+            if (request.AccountId.HasValue)
+            {
+                query = query.Where(x => x.AccountId == request.AccountId.Value);
+            }
+
             query = query.Where(x => x.TransactionDate >= startDate && x.TransactionDate <= endDate);
 
             var result = await query
                                 .ProjectToType<TransactionDto>()
+                                .OrderByDescending(x => x.TransactionDate).ThenByDescending(x => x.CreatedDate)
                                 .ToListAsync(cancellationToken);
 
             return Result<List<TransactionDto>>.Success(result);

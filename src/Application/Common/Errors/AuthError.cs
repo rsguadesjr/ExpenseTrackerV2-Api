@@ -9,5 +9,6 @@ namespace ExpenseTracker.Application.Common.Errors
         public static readonly Error UserNotFound = new("UserNotFound", "User not found.", ErrorType.NotFound);
         public static readonly Error UserAlreadyExists = new("UserAlreadyExists", "User already exists.", ErrorType.Conflict);
         public static readonly Error DuplicateEmail = new("DuplicateEmail", "Email already exists.", ErrorType.Conflict);
+        public static readonly Error EmailNotVerified = new("DuplicateEmail", "Email already exists.", ErrorType.Conflict);
     }
 }

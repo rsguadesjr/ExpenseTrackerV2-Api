@@ -20,6 +20,7 @@ namespace ExpenseTracker.Application.Transactions.Common
         //public KeyValueItem<Guid, string> CreatedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
         //public KeyValueItem<Guid, string> ModifiedBy { get; set; }
+        public Guid AccountId { get; set; }
         public List<string> Tags { get; set; }
     }
 }

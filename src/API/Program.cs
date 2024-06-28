@@ -15,14 +15,17 @@ var builder = WebApplication.CreateBuilder(args);
         loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
     });
 
-    var corsConfig = builder.Configuration.GetSection("Cors:AllowedOrigins");
-    var allowedOrigins = corsConfig.Get<string[]>() ?? [];
+    var allowedOriginsConfig = builder.Configuration.GetSection("Cors:AllowedOrigins");
+    var allowedMethodsConfig = builder.Configuration.GetSection("Cors:AllowedMethods");
+    var allowedOrigins = allowedOriginsConfig.Get<string[]>() ?? [];
+    var allowedMethods = allowedMethodsConfig.Get<string[]>() ?? [];
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("CorsPolicy",
                           policy =>
                           {
                               policy.WithOrigins(allowedOrigins)
+                                    .WithMethods(allowedMethods)
                                     .AllowAnyHeader();
                           });
     });

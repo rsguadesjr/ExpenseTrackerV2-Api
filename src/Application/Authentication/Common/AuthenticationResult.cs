@@ -8,11 +8,8 @@ namespace ExpenseTracker.Application.Authentication.Common
 {
     public class AuthenticationResult
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string Token { get; set; }
-        public bool IsProfileSetupComplete { get; set; }
+        public string? AccessToken { get; set; }
+        public bool IsEmailVerified { get; set; }
     }
 
 }

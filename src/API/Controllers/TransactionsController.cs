@@ -87,9 +87,9 @@ namespace ExpenseTracker.API.Controllers
         [ProducesResponseType(typeof(List<TransactionDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
         [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
-        public async Task<IActionResult> GetTransactions([FromQuery] int year, [FromQuery] int? month)
+        public async Task<IActionResult> GetTransactions([FromQuery] int year, [FromQuery] int? month, [FromQuery] Guid? accountId)
         {
-            var query = new GetTransactionsByMonthAndYearQuery { Year = year, Month = month };
+            var query = new GetTransactionsQuery { Year = year, Month = month, AccountId = accountId };
             var result = await _mediator.Send(query);
 
 

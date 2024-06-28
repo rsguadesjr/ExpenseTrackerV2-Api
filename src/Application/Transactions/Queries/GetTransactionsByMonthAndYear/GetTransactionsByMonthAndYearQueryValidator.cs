@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonthAndYear
 {
-    public class GetTransactionsByMonthAndYearQueryValidator : AbstractValidator<GetTransactionsByMonthAndYearQuery>
+    public class GetTransactionsByMonthAndYearQueryValidator : AbstractValidator<GetTransactionsQuery>
     {
         public GetTransactionsByMonthAndYearQueryValidator()
         {

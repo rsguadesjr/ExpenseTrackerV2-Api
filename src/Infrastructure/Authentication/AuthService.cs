@@ -42,7 +42,7 @@ namespace ExpenseTracker.Infrastructure.Authentication
                 throw;
             }
         }
-        public async Task<string> LoginWithEmailAndPasswordAsync(string email, string password)
+        public async Task<string?> LoginWithEmailAndPasswordAsync(string email, string password)
         {
             var request = new
             {
@@ -66,12 +66,14 @@ namespace ExpenseTracker.Infrastructure.Authentication
                 {
                     var email = result.Claims.First(x => x.Key == JwtRegisteredClaimNames.Email).Value?.ToString();
                     var name = result.Claims.First(x => x.Key == JwtRegisteredClaimNames.Name).Value?.ToString();
-
+                    var emailVerified = result.Claims.First(x => x.Key == "email_verified").Value?.ToString();
+                    
                     return new VerifyTokenResult
                     {
                         IdentityId = result.Uid,
                         Email = email,
-                        Name = name
+                        Name = name,
+                        EmailVerified = bool.TryParse(emailVerified, out var emailVerifiedBool) && emailVerifiedBool
                     };
                 }
 

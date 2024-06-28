@@ -62,32 +62,10 @@ namespace ExpenseTracker.Application.Authentication.Commands.Register
                 IdentityId = uid,
             };
 
-            await _dbContext.Users.AddAsync(user);
-
-            // create default account
-            var account = new Domain.Entities.Account
-            {
-                Id = Guid.NewGuid(),
-                Name = user.FirstName,
-                Description = "Default Account",
-                UserId = user.Id,
-                IsActive = true,
-                IsDefault = true
-            };
-            await _dbContext.Accounts.AddAsync(account);
-
-            // Default Categories from app settings json
-            var defaultCategories = _configuration.GetSection("Defaults:Categories").Get<List<string>>();
-            var categories = defaultCategories.Select((x, i) => new Category
-            {
-                Id = Guid.NewGuid(),
-                Name = x,
-                UserId = user.Id,
-                Order = i + 1
-
-            }).ToList();
-            await _dbContext.Categories.AddRangeAsync(categories);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Users.AddAsync(user, cancellationToken);
+            await CreateDefaultAccount(user, cancellationToken);
+            await CreateDefaultCategories(user, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
 
             // create custom claims
@@ -101,14 +79,52 @@ namespace ExpenseTracker.Application.Authentication.Commands.Register
             // get access token
             var accessToken = await _authService.LoginWithEmailAndPasswordAsync(command.Email, command.Password);
 
-            var authResult = new AuthenticationResult
+            // verify email
+            var authResult = await _authService.VerifyTokenAsync(accessToken);
+            var isEmailVerified = authResult?.EmailVerified ?? false;
+            if (isEmailVerified)
             {
-                Email = command.Email,
-                FirstName = command.FirstName,
-                LastName = command.LastName,
-                Token = accessToken
+                return Result<AuthenticationResult>.Success(new AuthenticationResult
+                {
+                    AccessToken = accessToken,
+                    IsEmailVerified = true
+                });
+            }
+
+            return Result<AuthenticationResult>.Success(new AuthenticationResult
+            {
+                IsEmailVerified = false
+            });
+        }
+
+
+        private async Task CreateDefaultAccount(User user, CancellationToken cancellationToken)
+        {
+            // create default account
+            var account = new Domain.Entities.Account
+            {
+                Id = Guid.NewGuid(),
+                Name = user.FirstName!,
+                Description = "Default Account",
+                UserId = user.Id,
+                IsActive = true,
+                IsDefault = true
             };
-            return Result<AuthenticationResult>.Success(authResult);
+            await _dbContext.Accounts.AddAsync(account, cancellationToken);
+        }
+
+        private async Task CreateDefaultCategories(User user, CancellationToken cancellationToken)
+        {
+            // create default categories
+            var defaultCategories = _configuration.GetSection("Defaults:Categories").Get<List<string>>() ?? [];
+            var categories = defaultCategories.Select((x, i) => new Category
+            {
+                Id = Guid.NewGuid(),
+                Name = x,
+                UserId = user.Id,
+                Order = i + 1
+            }).ToList();
+            await _dbContext.Categories.AddRangeAsync(categories, cancellationToken);
         }
     }
 }

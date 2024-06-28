@@ -55,7 +55,7 @@ public class AuthenticationController : ApiController
         return Problem(result.Errors);
     }
 
-    [HttpPost("social")]
+    [HttpPost("token/login")]
     public async Task<IActionResult> LoginWithToken(SocialLogin request)
     {
         var query = _mapper.Map<LoginWithTokenCommand>(request);

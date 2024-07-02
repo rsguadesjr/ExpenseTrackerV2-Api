@@ -12,16 +12,16 @@ namespace ExpenseTracker.API
         public static IServiceCollection AddPresentation(this IServiceCollection services)
         {
             services.AddControllers()
-                .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc;
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            })
                     .AddJsonOptions(options =>
                     {
                         options.JsonSerializerOptions.Converters.Add(new TrimStringConverter());
-                        //options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
+                        options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
                     })
+                    //.AddNewtonsoftJson(options =>
+                    //{
+                    //    options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc;
+                    //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    //})
                     .ConfigureApiBehaviorOptions(options =>
                     {
                         options.SuppressModelStateInvalidFilter = true;

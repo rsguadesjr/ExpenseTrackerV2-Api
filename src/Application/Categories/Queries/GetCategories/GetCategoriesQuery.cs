@@ -31,6 +31,7 @@ namespace ExpenseTracker.Application.Categories.Queries.GetCategories
             var categories = await _dbContext.Categories
                 .AsNoTracking()
                 .Where(x => x.UserId == _requestContext.UserId)
+                .OrderBy(x => x.Order)
                 .ProjectToType<CategoryDto>()
                 .ToListAsync(cancellationToken);
 

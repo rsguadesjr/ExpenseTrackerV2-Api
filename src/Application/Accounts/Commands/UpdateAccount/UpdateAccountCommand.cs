@@ -15,6 +15,7 @@ namespace ExpenseTracker.Application.Accounts.Commands.UpdateAccount
         public required string Name { get; set; }
         public string? Description { get; set; }
         public bool IsDefault { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class UpdateAccountCommandHandler : IRequestHandler<UpdateAccountCommand, Result<AccountDto>>
@@ -47,20 +48,30 @@ namespace ExpenseTracker.Application.Accounts.Commands.UpdateAccount
                 return Result<AccountDto>.Failure(AccountError.NameNotUnique);
             }
 
+            if (!request.IsActive && request.IsDefault)
+            {
+                return Result<AccountDto>.Failure(AccountError.DefaultAccountMustBeActive);
+            }
+
+
             if (account.IsDefault && !request.IsDefault)
             {
                 return Result<AccountDto>.Failure(AccountError.CurrentAccountMustRemainDefault);
             }
 
-            // set other accounts to not default
-            foreach (var acc in accounts)
+            // if account is default, set all other accounts to not default
+            if (request.IsDefault)
             {
-                acc.IsDefault = false;
+                foreach (var acc in accounts)
+                {
+                    acc.IsDefault = false;
+                }
             }
 
             account.Name = request.Name;
             account.Description = request.Description ?? string.Empty;
             account.IsDefault = request.IsDefault;
+            account.IsActive = request.IsActive;
 
             await _dbContext.SaveChangesAsync(_requestContext.UserId, cancellationToken);
 

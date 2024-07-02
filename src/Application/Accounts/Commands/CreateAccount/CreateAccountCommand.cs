@@ -19,6 +19,7 @@ namespace ExpenseTracker.Application.Accounts.Commands.CreateAccount
         public required string Name { get; set; }
         public string? Description { get; set; }
         public bool IsDefault { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand, Result<AccountDto>>
@@ -50,6 +51,12 @@ namespace ExpenseTracker.Application.Accounts.Commands.CreateAccount
             {
                 return Result<AccountDto>.Failure(AccountError.NameNotUnique);
             }
+
+            if (!request.IsActive && request.IsDefault)
+            {
+                return Result<AccountDto>.Failure(AccountError.DefaultAccountMustBeActive);
+            }
+
 
             // if account is default, set all other accounts to not default
             if (request.IsDefault)

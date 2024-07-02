@@ -1,24 +1,18 @@
-﻿using ExpenseTracker.Application.Common.Errors;
-using ExpenseTracker.Application.Common.Interfaces.Authentication;
+﻿using ExpenseTracker.Application.Common.Interfaces.Authentication;
 using ExpenseTracker.Application.Common.Interfaces.Persistence;
 using ExpenseTracker.Application.Transactions.Common;
 using ExpenseTracker.Domain.Models.Common;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using OneOf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonthAndYear
+namespace ExpenseTracker.Application.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsQuery : IRequest<Result<List<TransactionDto>>>
     {
         public int? Month { get; set; }
         public int Year { get; set; }
+        public int TimezoneOffset { get; set; } = 0;
         public Guid? AccountId { get; set; }
     }
     public class GetTransactionsByMonthAndYearQueryHandler : IRequestHandler<GetTransactionsQuery, Result<List<TransactionDto>>>
@@ -32,23 +26,22 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonth
         }
         public async Task<Result<List<TransactionDto>>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
-            DateTime startDate;
-            DateTime endDate;
+            DateTimeOffset startDate;
+            DateTimeOffset endDate;
 
             var query = _dbContext.Transactions
                                             .AsNoTracking()
                                             .Where(x => x.Account.UserId == _requestContext.UserId);
+
             if (request.Month.HasValue)
             {
-                // date params will be the whole month
-                startDate = new DateTime(request.Year, request.Month.Value, 1, 0, 0, 0, DateTimeKind.Utc);
-                endDate = new DateTime(request.Year, request.Month.Value, DateTime.DaysInMonth(request.Year, request.Month.Value), 0, 0, 0, DateTimeKind.Utc);
+                startDate = new DateTimeOffset(request.Year, request.Month.Value, 1, 0, 0, 0, TimeSpan.FromMinutes(request.TimezoneOffset));
+                endDate = new DateTimeOffset(request.Year, request.Month.Value, DateTime.DaysInMonth(request.Year, request.Month.Value), 0, 0, 0, TimeSpan.FromMinutes(request.TimezoneOffset));
             }
             else
             {
-                // date params will be the whole year
-                startDate = new DateTime(request.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                endDate = new DateTime(request.Year, 12, 31, 0, 0, 0, DateTimeKind.Utc);
+                startDate = new DateTimeOffset(request.Year, 1, 1, 0, 0, 0, TimeSpan.FromMinutes(request.TimezoneOffset));
+                endDate = new DateTimeOffset(request.Year, 12, 31, 0, 0, 0, TimeSpan.FromMinutes(request.TimezoneOffset));
             }
 
             if (request.AccountId.HasValue)
@@ -56,7 +49,9 @@ namespace ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonth
                 query = query.Where(x => x.AccountId == request.AccountId.Value);
             }
 
-            query = query.Where(x => x.TransactionDate >= startDate && x.TransactionDate <= endDate);
+            var sDate = startDate.UtcDateTime;
+            var eDate = endDate.UtcDateTime;
+            query = query.Where(x => x.TransactionDate >= sDate && x.TransactionDate <= endDate);
 
             var result = await query
                                 .ProjectToType<TransactionDto>()

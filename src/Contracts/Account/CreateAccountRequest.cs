@@ -14,5 +14,6 @@ namespace ExpenseTracker.Contracts.Account
         public string? Description { get; set; }
         [Required]
         public required bool IsDefault { get; set; }
+        public bool? IsActive { get; set; }
     }
 }

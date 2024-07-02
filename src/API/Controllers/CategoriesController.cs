@@ -1,5 +1,6 @@
 ﻿using ExpenseTracker.Application.Categories.Commands.CreateCategory;
 using ExpenseTracker.Application.Categories.Commands.DeleteCategory;
+using ExpenseTracker.Application.Categories.Commands.SortCategories;
 using ExpenseTracker.Application.Categories.Commands.UpdateCategory;
 using ExpenseTracker.Application.Categories.Common;
 using ExpenseTracker.Application.Categories.Queries.GetCategories;
@@ -104,6 +105,27 @@ namespace ExpenseTracker.API.Controllers
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             var command = new DeleteCategoryCommand { Id = id };
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+            {
+                return Ok();
+            }
+
+            return Problem(result.Errors);
+        }
+
+
+
+        // PUT api/categories/sorted-categories
+        [HttpPost("sorted-categories")]
+        [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+        [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+        public async Task<IActionResult> SortCategories([FromBody] List<Contracts.Category.SortCategoryRequest> sortCategories)
+        {
+            var mapped = _mapper.Map<List<Application.Categories.Commands.SortCategories.SortCategoryRequest>>(sortCategories);
+            var command = new SortCategoriesCommand { SortRequests = new List<Application.Categories.Commands.SortCategories.SortCategoryRequest>(mapped) };
             var result = await _mediator.Send(command);
 
             if (result.IsSuccess)

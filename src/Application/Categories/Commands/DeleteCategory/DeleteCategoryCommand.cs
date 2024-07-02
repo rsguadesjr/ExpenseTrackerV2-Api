@@ -13,7 +13,6 @@ namespace ExpenseTracker.Application.Categories.Commands.DeleteCategory
         public Guid Id { get; set; }
     }
 
-    // generate DeleteCategoryCommandHandler class with IExpenseTrackerDbContext and IRequestContext as constructor parameters
     public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Result<string>>
     {
         private readonly IExpenseTrackerDbContext _dbContext;
@@ -25,6 +24,7 @@ namespace ExpenseTracker.Application.Categories.Commands.DeleteCategory
         }
         public async Task<Result<string>> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
         {
+            // TODO: update db context to delete cascade null
             var category = await _dbContext.Categories.SingleOrDefaultAsync(x => x.UserId == _requestContext.UserId && x.Id == request.Id, cancellationToken);
             if (category == null)
             {

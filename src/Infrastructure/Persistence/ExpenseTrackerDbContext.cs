@@ -2,6 +2,7 @@
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,12 @@ namespace ExpenseTracker.Infrastructure.Persistence
             }
         }
 
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<DateTime>().HaveConversion<DateTimeAsUtcValueConverter>();
+            configurationBuilder.Properties<DateTime?>().HaveConversion<NullableDateTimeAsUtcValueConverter>();
+        }
+
         private void OnBeforeSaveChanges(DateTime? dateTime, Guid? userId)
         {
             ChangeTracker.DetectChanges();
@@ -68,4 +75,14 @@ namespace ExpenseTracker.Infrastructure.Persistence
             }
         }
     }
+
+    public class NullableDateTimeAsUtcValueConverter() : ValueConverter<DateTime?, DateTime?>(
+    v => !v.HasValue ? v : ToUtc(v.Value), v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v)
+    {
+        private static DateTime? ToUtc(DateTime v) => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime();
+    }
+
+    public class DateTimeAsUtcValueConverter() : ValueConverter<DateTime, DateTime>(
+        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(), v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
 }

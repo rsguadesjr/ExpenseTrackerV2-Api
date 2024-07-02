@@ -4,13 +4,14 @@ using Mapster;
 
 namespace ExpenseTracker.API.Mappings
 {
-    public class AccountCategoryMapping : IRegister
+    public class AccountMapping : IRegister
     {
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<(Guid id, CreateAccountRequest request), UpdateAccountCommand>()
                 .Map(dest => dest.Id, src => src.id)
-                .Map(dest => dest, src => src.request);
+                .Map(dest => dest, src => src.request)
+                .Map(dest => dest.IsActive, src => src.request.IsActive ?? true);
         }
     }
 }

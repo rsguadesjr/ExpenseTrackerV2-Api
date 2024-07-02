@@ -3,15 +3,13 @@ using ExpenseTracker.Application.Transactions.Commands.CreateTransaction;
 using ExpenseTracker.Application.Transactions.Commands.DeleteTransaction;
 using ExpenseTracker.Application.Transactions.Commands.UpdateTransaction;
 using ExpenseTracker.Application.Transactions.Queries.GetTransactionById;
-using ExpenseTracker.Application.Transactions.Queries.GetTransactionsByMonthAndYear;
+using ExpenseTracker.Application.Transactions.Queries.GetTransactions;
 using ExpenseTracker.Contracts.Common;
 using ExpenseTracker.Contracts.Transaction;
-using Mapster;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using System.Net.Mime;
 
 namespace ExpenseTracker.API.Controllers
@@ -87,9 +85,12 @@ namespace ExpenseTracker.API.Controllers
         [ProducesResponseType(typeof(List<TransactionDto>), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
         [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
-        public async Task<IActionResult> GetTransactions([FromQuery] int year, [FromQuery] int? month, [FromQuery] Guid? accountId)
+        public async Task<IActionResult> GetTransactions([FromQuery] int year,
+                                                         [FromQuery] int? month,
+                                                         [FromQuery] Guid? accountId,
+                                                         [FromQuery] int timezoneOffset)
         {
-            var query = new GetTransactionsQuery { Year = year, Month = month, AccountId = accountId };
+            var query = new GetTransactionsQuery { Year = year, Month = month, AccountId = accountId, TimezoneOffset =  timezoneOffset};
             var result = await _mediator.Send(query);
 
 

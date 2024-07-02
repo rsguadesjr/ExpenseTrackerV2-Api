@@ -24,7 +24,7 @@ namespace ExpenseTracker.Infrastructure.Authentication
                 var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst("guid");
                 if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 {
-                    throw new ApplicationException("User ID claim not found or invalid");
+                    throw new UnauthorizedAccessException("User ID claim not found or invalid");
                 }
                 return userId;
             }

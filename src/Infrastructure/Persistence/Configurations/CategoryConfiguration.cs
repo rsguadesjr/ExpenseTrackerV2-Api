@@ -19,6 +19,8 @@ namespace ExpenseTracker.Infrastructure.Persistence.Configurations
 
             builder.HasKey(x => x.Id); 
             builder.Property(x => x.Id).HasDefaultValueSql("newid()");
+
+            builder.HasMany(x => x.Transactions).WithOne(x => x.Category).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

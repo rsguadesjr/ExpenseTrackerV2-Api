@@ -30,12 +30,16 @@ namespace ExpenseTracker.Application.Categories.Commands.CreateCategory
         }
         public async Task<Result<CategoryDto>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
+            var order = request.Order ?? (await _dbContext.Categories
+                .Where(x => x.UserId == _requestContext.UserId)
+                .CountAsync(cancellationToken) + 1) ;
+
             var category = new Category
             {
                 Name = request.Name,
                 Description = request.Description,
                 IsActive = request.IsActive ?? true,
-                Order = request.Order,
+                Order = order,
                 UserId = _requestContext.UserId
             };
 

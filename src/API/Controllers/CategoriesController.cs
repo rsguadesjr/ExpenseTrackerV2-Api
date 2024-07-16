@@ -117,9 +117,9 @@ namespace ExpenseTracker.API.Controllers
 
 
 
-        // PUT api/categories/sorted-categories
+        // POST api/categories/sorted-categories
         [HttpPost("sorted-categories")]
-        [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK, MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
         [ProducesResponseType(typeof(ApiProblemDetails), StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
         public async Task<IActionResult> SortCategories([FromBody] List<Contracts.Category.SortCategoryRequest> sortCategories)
